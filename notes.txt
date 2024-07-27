@@ -1,0 +1,25 @@
+using lambda functions - use Optional<>
+
+task has three properties
+- id (int)
+- description (string
+- status (Enum)
+
+ignore case when checking for matches
+use string formatting - including left and right alignment
+menu options can be either lower or upper case
+
+restrictions:
+cannot add duplicates
+cannot mark pending tasks pending
+cannot mark done tasks done
+cannot mark cancelled tasks cancelled
+
+display tasks by status by name
+- first pending
+- then done
+- then cancelled
+
+use input validation for invalid values - prompt to try again
+use unicode character for tick mark with done tasks
+

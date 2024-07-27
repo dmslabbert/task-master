@@ -10,9 +10,6 @@ public class TaskMasterService {
     private final List<Task> tasks = new ArrayList<>();
 
     public void run() {
-        tasks.add(new Task(1, "Apples", Status.PENDING));
-        tasks.add(new Task(2, "Bananas", Status.DONE));
-        tasks.add(new Task(3, "Carrots", Status.CANCELLED));
         while (true) {
             showList();
             var menuOption = getMenuOption();
@@ -44,7 +41,7 @@ public class TaskMasterService {
         var name = getInputString("New Task (Enter to quit)");
         if ("".equals(name)) return;
 
-        var hasMatch = tasks.stream().anyMatch(x -> x.getName().equals(name));
+        var hasMatch = tasks.stream().anyMatch(x -> x.getName().equalsIgnoreCase(name));
         if (name != null && !hasMatch) {
             var nextId = getNextId();
             tasks.add(new Task(nextId, name, Status.PENDING));
@@ -93,7 +90,7 @@ public class TaskMasterService {
 
     private void update() {
         System.out.println("ID Status Description");
-        List<Task> candidateTasks = tasks;
+        List<Task> candidateTasks = tasks.stream().sorted(Comparator.comparing(Task::getName)).toList();
         for (var todo : candidateTasks) {
             System.out.printf("%-2d %s %s\n", todo.getId(), symbolise(todo.getStatus()), todo.getName());
         }
@@ -101,6 +98,7 @@ public class TaskMasterService {
         if (taskId == 0) return;
         Optional<Task> taskOptional = candidateTasks.stream().filter(x -> x.getId() == taskId).findFirst();
         taskOptional.ifPresent(task -> {
+            System.out.println("Old Description: " + task.getName());
             var name = getInputString("New Description (Enter to quit)");
             if ("".equals(name)) return;
 
@@ -139,7 +137,7 @@ public class TaskMasterService {
     }
 
     private void showList() {
-        System.out.println("TASK LIST:");
+        System.out.println("*** TASK MASTER ***");
         System.out.println("ID Status Description");
         for (var todo : getTasks(Status.PENDING)) {
             System.out.printf("%2d %-6s %s\n", todo.getId(), symbolise(todo.getStatus()), todo.getName());
@@ -161,15 +159,9 @@ public class TaskMasterService {
 
     private String getMenuOption() {
         while (true) {
-            System.out.print("[N]ew, ");
-            System.out.print("[D]one, ");
-            System.out.print("[P]ending, ");
-            System.out.print("[C]ancelled, ");
-            System.out.print("[U]pdate, ");
-            System.out.print("[R]emove, ");
-            System.out.print("[Q]uit: ");
-            List<String> options = Arrays.asList("N", "D", "P", "C", "U", "R", "Q");
+            System.out.print("[N]ew, [D]one, [P]ending, [C]ancelled, [U]pdate, [R]emove, [Q]uit: ");
             Scanner in = new Scanner(System.in);
+            List<String> options = Arrays.asList("N", "D", "P", "C", "U", "R", "Q");
             var option = in.nextLine().toUpperCase();
             if (options.contains(option)) {
                 return option;
