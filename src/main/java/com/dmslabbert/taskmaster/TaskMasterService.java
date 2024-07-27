@@ -54,7 +54,7 @@ public class TaskMasterService {
         for (var todo : pendingTasks) {
             System.out.printf("%-2d %s %s\n", todo.getId(), symbolise(todo.getStatus()), todo.getName());
         }
-        var taskId = getTaskId();
+        var taskId = getTaskId("Select Task ID to be Marked Done");
         if (taskId == 0) return;
         Optional<Task> taskOptional = pendingTasks.stream().filter(x -> x.getId() == taskId).findFirst();
         taskOptional.ifPresent(task -> task.setStatus(Status.DONE));
@@ -68,33 +68,27 @@ public class TaskMasterService {
         for (var todo : candidateTasks) {
             System.out.printf("%-2d %s %s\n", todo.getId(), symbolise(todo.getStatus()), todo.getName());
         }
-        var taskId = getTaskId();
+        var taskId = getTaskId("Select Task ID to be Marked Pending");
         if (taskId == 0) return;
         Optional<Task> taskOptional = candidateTasks.stream().filter(x -> x.getId() == taskId).findFirst();
         taskOptional.ifPresent(task -> task.setStatus(Status.PENDING));
     }
 
     private void markAsCancelled() {
-        System.out.println("ID Status Description");
         List<Task> candidateTasks = new ArrayList<>();
         candidateTasks.addAll(getTasks(Status.PENDING));
         candidateTasks.addAll(getTasks(Status.DONE));
-        for (var todo : candidateTasks) {
-            System.out.printf("%-2d %s %s\n", todo.getId(), symbolise(todo.getStatus()), todo.getName());
-        }
-        var taskId = getTaskId();
+        showCandidateTasks(candidateTasks);
+        var taskId = getTaskId("Select Task ID to be Marked Cancelled");
         if (taskId == 0) return;
         Optional<Task> taskOptional = candidateTasks.stream().filter(x -> x.getId() == taskId).findFirst();
         taskOptional.ifPresent(task -> task.setStatus(Status.CANCELLED));
     }
 
     private void update() {
-        System.out.println("ID Status Description");
         List<Task> candidateTasks = tasks.stream().sorted(Comparator.comparing(Task::getName)).toList();
-        for (var todo : candidateTasks) {
-            System.out.printf("%-2d %s %s\n", todo.getId(), symbolise(todo.getStatus()), todo.getName());
-        }
-        var taskId = getTaskId();
+        showCandidateTasks(candidateTasks);
+        var taskId = getTaskId("Select Task ID to Update");
         if (taskId == 0) return;
         Optional<Task> taskOptional = candidateTasks.stream().filter(x -> x.getId() == taskId).findFirst();
         taskOptional.ifPresent(task -> {
@@ -110,15 +104,19 @@ public class TaskMasterService {
     }
 
     private void remove() {
-        System.out.println("ID Status Description");
-        List<Task> candidateTasks = tasks;
-        for (var todo : candidateTasks) {
-            System.out.printf("%-2d %s %s\n", todo.getId(), symbolise(todo.getStatus()), todo.getName());
-        }
-        var taskId = getTaskId();
+        List<Task> candidateTasks = tasks.stream().sorted(Comparator.comparing(Task::getName)).toList();;
+        showCandidateTasks(candidateTasks);
+        var taskId = getTaskId("Select Task ID to Remove");
         if (taskId == 0) return;
         Optional<Task> taskOptional = candidateTasks.stream().filter(x -> x.getId() == taskId).findFirst();
         taskOptional.ifPresent(tasks::remove);
+    }
+
+    private void showCandidateTasks(List<Task> candidateTasks) {
+        System.out.println("ID Status Description");
+        for (var todo : candidateTasks) {
+            System.out.printf("%-2d %s %s\n", todo.getId(), symbolise(todo.getStatus()), todo.getName());
+        }
     }
 
     private int getNextId() {
@@ -128,15 +126,16 @@ public class TaskMasterService {
 
     private String symbolise(Status status) {
         if (status == Status.DONE) {
-            return "[" + Character.toString(0x2713) + "]";
+            return "[D]";
         }
         if (status == Status.CANCELLED) {
-            return "[x]";
+            return "[C]";
         }
         return "[ ]";
     }
 
     private void showList() {
+        System.out.println();
         System.out.println("*** TASK MASTER ***");
         System.out.println("ID Status Description");
         for (var todo : getTasks(Status.PENDING)) {
@@ -177,10 +176,10 @@ public class TaskMasterService {
         return in.nextLine();
     }
 
-    private int getTaskId() {
+    private int getTaskId(String label) {
         while (true) {
             try {
-                System.out.print("Task ID (0 to quit): ");
+                System.out.print(label + " (0 to quit): ");
                 Scanner in = new Scanner(System.in);
                 return in.nextInt();
             } catch (Exception e) {
